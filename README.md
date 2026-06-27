@@ -87,6 +87,13 @@ Outputs:
 
 **Note:** the NLLB model (~2.4 GB) is downloaded automatically on first run. No GPU required, though translation will be faster with one.
 
+**Results:**
+
+| Metric | Score |
+|---|---|
+| BLEU | 21.23 |
+| chrF | 48.17 |
+| TER | 68.34 |
 ---
 
 ## Author
