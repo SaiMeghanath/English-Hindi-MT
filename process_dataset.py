@@ -1,8 +1,18 @@
+"""
+Assessment 1: English-Hindi Dataset Processing and Analysis
+Dataset: ainlpml/english-hindi (gated) -> eng.txt + hin.txt, line-aligned parallel text files
+
+Pipeline: download -> pair lines -> word count -> filter -> diff filter -> export to Excel
+"""
+
 import os
 import re
 import pandas as pd
 from huggingface_hub import hf_hub_download
 
+# -----------------------------
+# CONFIG
+# -----------------------------
 REPO_ID = "ainlpml/english-hindi"
 ENG_FILE = "eng.txt"
 HIN_FILE = "hin.txt"
@@ -13,12 +23,12 @@ WORD_COUNT_MAX = 50
 DIFF_MIN = -10
 DIFF_MAX = 10
 
-OUTPUT_PATH = "english_hindi_cleaned.xlsx"
+OUTPUT_PATH = "/mnt/user-data/outputs/english_hindi_cleaned.xlsx"
 
-HF_TOKEN = os.environ.get("HF_TOKEN")
+HF_TOKEN = os.environ.get("HF_TOKEN")  # set this env var before running, or paste token below
 
 
-def word_count(text):
+def word_count(text: str) -> int:
     if not isinstance(text, str) or not text.strip():
         return 0
     return len(re.findall(r"\S+", text.strip()))
@@ -58,6 +68,7 @@ def main():
     if len(df) < MIN_ROWS_REQUIRED:
         print(f"WARNING: only {len(df)} rows available, below required {MIN_ROWS_REQUIRED}.")
 
+    # 3. Word Count Analysis
     df["Word Count (English)"] = df["English"].apply(word_count)
     df["Word Count (Hindi)"] = df["Hindi"].apply(word_count)
 
@@ -67,15 +78,17 @@ def main():
     ]
     print(f"After word-count range filter (5-50 both languages): {len(df)} rows")
 
+    # 4. Word Count Difference Calculation
     df["Word Count Difference"] = df["Word Count (English)"] - df["Word Count (Hindi)"]
     df = df[df["Word Count Difference"].between(DIFF_MIN, DIFF_MAX)]
     print(f"After word-count difference filter (-10 to +10): {len(df)} rows")
 
     df = df.reset_index(drop=True)
 
+    # 5. Final Output
     final_df = df.rename(columns={"English": "English Sentences", "Hindi": "Hindi Sentences"})
     final_df = final_df[
-        ["English Sentences", "Hindi Sentences", "Word Count (English)", "Word Count (Hindi)"]
+        ["English Sentences", "Hindi Sentences", "Word Count (English)", "Word Count (Hindi)", "Word Count Difference"]
     ]
 
     final_df.to_excel(OUTPUT_PATH, index=False, engine="openpyxl")
