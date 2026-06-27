@@ -1,0 +1,7 @@
+Assessment 2: Translation Evaluation Scores
+Model: facebook/nllb-200-distilled-600M
+Number of sentences evaluated: 100
+
+BLEU score : 21.23
+chrF score : 48.17
+TER score  : 68.34
